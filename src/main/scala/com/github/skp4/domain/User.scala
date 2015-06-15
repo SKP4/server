@@ -11,9 +11,8 @@ object UserJsonProtocol extends DefaultJsonProtocol {
 
   implicit val userFormat = jsonFormat3(User)
   implicit val userUnmarshaller =
-    Unmarshaller.delegate[String, User](MediaTypes.`application/json`) { string:String =>
-      val user = string.parseJson.convertTo[User]
-      user
+    Unmarshaller.delegate[String, User](MediaTypes.`application/json`) {
+      _.parseJson.convertTo[User]
     }
 }
 
