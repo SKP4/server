@@ -20,12 +20,6 @@ class UserController extends Controller {
 
   def createUid: Long = uid.incrementAndGet()
 
-  def getUser(uid: Long) = Action {
-    if (users.values.f)
-      Ok(Json.toJson(users(uid)))
-    else NotFound
-  }
-
   def getAllUsers = Action {
     Ok(Json.toJson(users.values))
   }
@@ -33,9 +27,12 @@ class UserController extends Controller {
   def createUser = Action(parse.json) { request =>
     val signupReq@UserSignupRequest(name, age) = request.body.as[UserSignupRequest]
     val uid = createUid
-
     val created = User(uid, name, age)
-    users += name -> created
-    Ok(Json.toJson(created))
+
+    if (users.contains(name)) Conflict
+    else {
+      users += name -> created
+      Ok(Json.toJson(created))
+    }
   }
 }
