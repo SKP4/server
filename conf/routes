@@ -4,6 +4,7 @@
 
 # Home page
 GET        /                    controllers.HomeController.index
+GET        /users/:uid          controllers.UserController.getUser(uid: Long)
 GET        /users               controllers.UserController.getAllUsers()
 POST        /users              controllers.UserController.createUser
 
