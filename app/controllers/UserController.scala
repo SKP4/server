@@ -44,7 +44,7 @@ class UserController extends Controller {
           case Nil        =>
             val created = User(uid, name, age)
             users += uid -> created
-            Ok(Json.toJson(created))
+            Created(Json.toJson(created))
         }
     }
   }

@@ -17,4 +17,9 @@ object User {
     (JsPath \ "name").read[String] and
     (JsPath \ "age").read[Int]
     )(UserSignupRequest.apply _)
+
+  implicit val userSignUpRequestWrites = (
+    (JsPath \ "name").write[String] and
+    (JsPath \ "age").write[Int]
+    )(unlift(UserSignupRequest.unapply))
 }
