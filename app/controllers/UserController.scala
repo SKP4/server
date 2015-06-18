@@ -34,15 +34,18 @@ class UserController extends Controller {
   }
 
   def createUser = Action(parse.json) { request =>
-    val signupReq@UserSignupRequest(name, age) = request.body.as[UserSignupRequest]
-    val uid = createUid
+    request.body.asOpt[UserSignupRequest] match {
+      case None => BadRequest // insufficient parameters
+      case Some(UserSignupRequest(name, age)) =>
+        val uid = createUid
 
-    users.values.filter(_.name == name).toList match {
-      case List(user) => Conflict
-      case Nil        =>
-        val created = User(uid, name, age)
-        users += uid -> created
-        Ok(Json.toJson(created))
+        users.values.filter(_.name == name).toList match {
+          case List(user) => Conflict
+          case Nil        =>
+            val created = User(uid, name, age)
+            users += uid -> created
+            Ok(Json.toJson(created))
+        }
     }
   }
 }

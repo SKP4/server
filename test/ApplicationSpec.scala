@@ -19,6 +19,22 @@ class ApplicationSpec extends Specification {
       route(FakeRequest(GET, "/user")) must beSome.which (status(_) == NOT_FOUND)
     }
 
+    "send 401 when given insufficient parameters (name)" in new WithApplication() {
+
+    }
+
+    "send 401 when given insufficient parameters (age)" in new WithApplication() {
+
+    }
+
+    "send 401 when given insufficient parameters (invalid json)" in new WithApplication() {
+      route(FakeRequest(
+        POST,
+        "/users",
+        FakeHeaders(Seq("Content-Type" -> Seq("application/json"))),
+        ""))
+    }
+
     "render the index page" in new WithApplication {
       val home = route(FakeRequest(GET, "/")).get
       status(home) must equalTo(OK)
