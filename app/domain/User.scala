@@ -2,9 +2,21 @@ package domain
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import slick.driver.JdbcProfile
 
 case class User(uid: Long, name: String, age: Int)
 case class UserSignupRequest(name: String, age: Int)
+
+//trait UserTable {
+//  protected val driver: JdbcProfile
+//  import driver.api._
+//
+//  class Users(tag: Tag) extends Table[User](tag, "USERS") {
+//    def uid  = column[Long]("id", O.PrimaryKey, O.AutoInc)
+//    def name = column[String]("NAME")
+//    def age  = column[Int]("COLOR")
+//  }
+//}
 
 object User {
   implicit val userWrites = (
