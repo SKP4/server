@@ -1,5 +1,7 @@
 # Backend written in Play 2
 
+[![Build Status](https://travis-ci.org/SKP4/server.svg?branch=develop)](https://travis-ci.org/SKP4/server)
+
 ### Development
 
 ```
