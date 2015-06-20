@@ -1,51 +1,64 @@
 package controllers
 
 
-import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
+import java.util.concurrent.atomic.{AtomicLong}
 
-import akka.actor.FSM.->
-import domain.{UserSignupRequest, User}
+
+import play.api
+import play.api.{db, Play}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfig}
 import play.api.libs.json.{Writes, Json, JsValue}
 import play.api.mvc.{Action, Controller}
 
-import User._
+import slick.lifted.TableQuery
+import slick.driver.H2Driver.api._
 
-import scala.collection.immutable.Iterable
+import model._
 
-class UserController extends Controller {
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Success}
 
-  var users = Map.empty[Long, User]
-  users += 1L -> User(1L, "Hoon", 27)
-  users += 2L -> User(2L, "Noh", 20)
+class UserController extends Controller with UserDao {
+  initDatabase()
+  import User._
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  var cache = Map.empty[Long, User]
+  cache += 1L -> User(1L, "Hoon", 27)
+  cache += 2L -> User(2L, "Noh", 20)
 
   var uid = new AtomicLong(2L)
 
   def createUid: Long = uid.incrementAndGet()
 
-  def getUser(uid: Long) = Action {
-    users.get(uid) match {
-      case Some(user) => Ok(Json.toJson(user))
-      case None       => NotFound
+  def getUser(id: Long) = Action.async {
+    findById(id).map { user =>
+      user match {
+        case Some(user) => Ok(Json.toJson(user))
+        case None       => NotFound
+      }
     }
   }
 
-  def getAllUsers = Action {
-    Ok(Json.toJson(users.values))
+  def getAllUsers = Action.async {
+    findAll().map(users => Ok(Json.toJson(users)))
   }
 
-  def createUser = Action(parse.json) { request =>
+  def createUser = Action.async(parse.json) { request =>
     request.body.asOpt[UserSignupRequest] match {
-      case None => BadRequest // insufficient parameters
+      case None => Future { BadRequest } // insufficient parameters
       case Some(UserSignupRequest(name, age)) =>
-        val uid = createUid
-
-        users.values.filter(_.name == name).toList match {
-          case List(user) => Conflict
-          case Nil        =>
-            val created = User(uid, name, age)
-            users += uid -> created
-            Created(Json.toJson(created))
-        }
+        findByName(name).map(user =>
+          user match {
+            case Some(user) => Conflict
+            case None =>
+              val uid = createUid
+              val created = User(uid, name, age)
+              insert(created)
+              Created(Json.toJson(created))
+          }
+        )
     }
   }
 }

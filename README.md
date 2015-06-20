@@ -13,6 +13,9 @@ checkout `localhost:9001`
 
 ### Testing
 
-1. remove `make` from your run configuration
+remove `make` from your run configuration
 
-2. `$ ./activator ~ compile:test'
+```
+$ ./activator
+> ~ test:compile
+```

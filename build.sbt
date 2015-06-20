@@ -15,6 +15,8 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.187"
 )
 
+fork in Test := false
+
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 // Play provides two styles of routers, one expects its actions to be injected, the

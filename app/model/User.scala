@@ -1,5 +1,7 @@
 package model
 
+import play.api
+import play.api.db
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import slick.lifted.ProvenShape
@@ -19,13 +21,39 @@ trait UserTable {
   }
 }
 
-object User {
+trait UserDao extends UserTable {
   import scala.concurrent.ExecutionContext.Implicits.global
+  val users = TableQuery[Users]
+  val db = Database.forConfig("h2mem1")
 
-  def findById(id: Long): Option[User] = {
-    db.run(u.result)
+  def initDatabase() = {
+    db.run(DBIO.seq(
+      users.schema.create,
+      users += User(1L, "Hoon", 27),
+      users += User(2L, "Noh", 20),
+      users.result.map(println)
+    ))
+    // db.close()
   }
 
+  def findById(id: Long): Future[Option[User]] = {
+    db.run(users.result).map(users => users.find(_.id == id))
+  }
+
+  def findByName(name: String): Future[Option[User]] = {
+    db.run(users.result).map(_.find(_.name == name))
+  }
+  
+  def findAll(): Future[Seq[User]] = {
+    db.run(users.result)
+  }
+
+  def insert(user: User): Unit = {
+    db.run(DBIO.seq(users += user))
+  }
+}
+
+object User {
   implicit val userWrites = (
     (JsPath \ "uid").write[Long] and
     (JsPath \ "name").write[String] and

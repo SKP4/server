@@ -1,8 +1,13 @@
 ### Day 3
 
-- slick basic
-- h2mem db
+- ~~h2mem db~~
+- ~~slick basic~~
+- insert if not exist
+- resolve test fail
+- db session
 
+- migrate to play-slick 
+- dynamic routing
 - event case class
 
 - resolve dep conflict
