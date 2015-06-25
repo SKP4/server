@@ -1,18 +1,22 @@
 package model
 
-import play.api
-import play.api.db
+import play.api.Play
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfig}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import slick.lifted.ProvenShape
-import slick.driver.H2Driver.api._
+import slick.dbio.DBIO
+import slick.driver.JdbcProfile
+import slick.lifted.{TableQuery, ProvenShape}
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 case class User(id: Long, name: String, age: Int)
 case class UserSignupRequest(name: String, age: Int)
 
 trait UserTable {
+  protected val driver: JdbcProfile
+  import driver.api._
   class Users(tag: Tag) extends Table[User](tag, "USERS") {
     def id = column[Long]("id", O.PrimaryKey)
     def name = column[String]("name")
@@ -21,20 +25,9 @@ trait UserTable {
   }
 }
 
-trait UserDao extends UserTable {
-  import scala.concurrent.ExecutionContext.Implicits.global
+object UserDao extends UserTable with HasDatabaseConfig[JdbcProfile] {
+  val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
   val users = TableQuery[Users]
-  val db = Database.forConfig("h2mem1")
-
-  def initDatabase() = {
-    db.run(DBIO.seq(
-      users.schema.create,
-      users += User(1L, "Hoon", 27),
-      users += User(2L, "Noh", 20),
-      users.result.map(println)
-    ))
-    // db.close()
-  }
 
   def findById(id: Long): Future[Option[User]] = {
     db.run(users.result).map(users => users.find(_.id == id))

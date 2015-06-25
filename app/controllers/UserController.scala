@@ -3,24 +3,14 @@ package controllers
 
 import java.util.concurrent.atomic.{AtomicLong}
 
-
-import play.api
-import play.api.{db, Play}
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfig}
-import play.api.libs.json.{Writes, Json, JsValue}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
-
-import slick.lifted.TableQuery
-import slick.driver.H2Driver.api._
 
 import model._
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.Future
 
 class UserController extends Controller with UserDao {
-  initDatabase()
   import User._
   import scala.concurrent.ExecutionContext.Implicits.global
 

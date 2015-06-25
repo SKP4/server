@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   ws,
   specs2 % Test,
   "com.typesafe.play" %% "play-slick" % "1.0.0",
-  "com.h2database" % "h2" % "1.4.187"
+  "com.typesafe.play" %% "play-slick-evolutions" % "1.0.0"
 )
 
 fork in Test := false

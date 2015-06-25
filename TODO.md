@@ -2,11 +2,12 @@
 
 - ~~h2mem db~~
 - ~~slick basic~~
-- insert if not exist
-- resolve test fail
-- db session
-
+- ~~insert if not exist~~
 - migrate to play-slick 
+
+- db session
+- resolve test fail
+
 - dynamic routing
 - event case class
 
