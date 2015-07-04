@@ -10,20 +10,18 @@ import model._
 
 import scala.concurrent.Future
 
-class UserController extends Controller with UserDao {
+class UserController extends Controller {
   import User._
+
   import scala.concurrent.ExecutionContext.Implicits.global
+  def dao = new UserDao
 
-  var cache = Map.empty[Long, User]
-  cache += 1L -> User(1L, "Hoon", 27)
-  cache += 2L -> User(2L, "Noh", 20)
-
-  var uid = new AtomicLong(2L)
+  var uid = new AtomicLong(0L)
 
   def createUid: Long = uid.incrementAndGet()
 
   def getUser(id: Long) = Action.async {
-    findById(id).map { user =>
+    dao.findById(id).map { user =>
       user match {
         case Some(user) => Ok(Json.toJson(user))
         case None       => NotFound
@@ -32,20 +30,20 @@ class UserController extends Controller with UserDao {
   }
 
   def getAllUsers = Action.async {
-    findAll().map(users => Ok(Json.toJson(users)))
+    dao.findAll().map(users => Ok(Json.toJson(users)))
   }
 
   def createUser = Action.async(parse.json) { request =>
     request.body.asOpt[UserSignupRequest] match {
       case None => Future { BadRequest } // insufficient parameters
       case Some(UserSignupRequest(name, age)) =>
-        findByName(name).map(user =>
+        dao.findByName(name).map(user =>
           user match {
             case Some(user) => Conflict
             case None =>
               val uid = createUid
               val created = User(uid, name, age)
-              insert(created)
+              dao.insert(created)
               Created(Json.toJson(created))
           }
         )

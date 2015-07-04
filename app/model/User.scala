@@ -4,30 +4,18 @@ import play.api.Play
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfig}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import slick.dbio.DBIO
 import slick.driver.JdbcProfile
 import slick.lifted.{TableQuery, ProvenShape}
-
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 case class User(id: Long, name: String, age: Int)
 case class UserSignupRequest(name: String, age: Int)
 
-trait UserTable {
-  protected val driver: JdbcProfile
-  import driver.api._
-  class Users(tag: Tag) extends Table[User](tag, "USERS") {
-    def id = column[Long]("id", O.PrimaryKey)
-    def name = column[String]("name")
-    def age = column[Int]("age")
-    def * : ProvenShape[User] = (id, name, age) <>((User.apply _).tupled, User.unapply)
-  }
-}
-
-object UserDao extends UserTable with HasDatabaseConfig[JdbcProfile] {
+class UserDao extends HasDatabaseConfig[JdbcProfile] {
   val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
-  val users = TableQuery[Users]
+  private val users = TableQuery[Users]
+  import driver.api._
 
   def findById(id: Long): Future[Option[User]] = {
     db.run(users.result).map(users => users.find(_.id == id))
@@ -38,11 +26,18 @@ object UserDao extends UserTable with HasDatabaseConfig[JdbcProfile] {
   }
   
   def findAll(): Future[Seq[User]] = {
-    db.run(users.result)
+    db.run(users.result).map(_.toList)
   }
 
   def insert(user: User): Unit = {
-    db.run(DBIO.seq(users += user))
+    db.run(users += user).map(_ => ())
+  }
+
+  class Users(tag: Tag) extends Table[User](tag, "user") {
+    def id = column[Long]("id", O.PrimaryKey)
+    def name = column[String]("name")
+    def age = column[Int]("age")
+    def * : ProvenShape[User] = (id, name, age) <>((User.apply _).tupled, User.unapply)
   }
 }
 

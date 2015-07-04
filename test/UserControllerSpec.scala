@@ -26,7 +26,7 @@ class UserControllerSpec extends Specification {
 
     "send 400 when given insufficient parameters (name, age)" in new WithApplication() {
       val result1 = buildUsersRequestAndRoute(POST, Json.toJson( """ { "age": 27 } """))
-      val result2 = buildUsersRequestAndRoute(POST, Json.toJson( """ { "name": "1ambda" } """))
+      val result2 = buildUsersRequestAndRoute(POST, Json.toJson( """ { "name": "lambda" } """))
       val result3 = buildUsersRequestAndRoute(POST, Json.toJson("""{}"""))
 
       status(result1) must equalTo(BAD_REQUEST)
@@ -36,7 +36,7 @@ class UserControllerSpec extends Specification {
 
     "return 409 when creating a duplicated user" in new WithApplication() {
       val result =
-        buildUsersRequestAndRoute(POST, Json.toJson(UserSignupRequest("Hoon", 27)))
+        buildUsersRequestAndRoute(POST, Json.toJson(UserSignupRequest("lambda", 27)))
 
       status(result) must equalTo(CONFLICT)
     }
