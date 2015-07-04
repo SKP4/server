@@ -12,7 +12,7 @@ import scala.concurrent.Future
 
 class UserController extends Controller {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import play.api.libs.concurrent.Execution.Implicits.defaultContext
   def dao = new UserDao
 
   def getUser(id: Long) = Action.async {

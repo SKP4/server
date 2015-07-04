@@ -7,12 +7,13 @@ import play.api.libs.functional.syntax._
 import slick.driver.JdbcProfile
 import slick.lifted.{TableQuery, ProvenShape}
 import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 case class User(id: Option[Long] = None, name: String, email: String, age: Int)
 case class UserSignupRequest(name: String, email: String, age: Int)
 
 class UserDao extends HasDatabaseConfig[JdbcProfile] {
+  import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
   val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
   private val users = TableQuery[Users]
   import driver.api._
