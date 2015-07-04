@@ -1,4 +1,4 @@
-import model.{UserSignupRequest, User}
+import model.{UserParser, UserSignupRequest}
 import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
@@ -16,7 +16,7 @@ import play.api.test.Helpers._
  */
 @RunWith(classOf[JUnitRunner])
 class UserControllerSpec extends Specification {
-  import User._
+  import UserParser._
 
   "UserController" should {
 
@@ -36,14 +36,14 @@ class UserControllerSpec extends Specification {
 
     "return 409 when creating a duplicated user" in new WithApplication() {
       val result =
-        buildUsersRequestAndRoute(POST, Json.toJson(UserSignupRequest("lambda", 27)))
+        buildUsersRequestAndRoute(POST, Json.toJson(UserSignupRequest("lambda", "lambda@gmail.com", 27)))
 
       status(result) must equalTo(CONFLICT)
     }
 
     "return 201 when creating a new user" in new WithApplication() {
       val result =
-        buildUsersRequestAndRoute(POST, Json.toJson(UserSignupRequest("Duk", 27)))
+        buildUsersRequestAndRoute(POST, Json.toJson(UserSignupRequest("Duk", "duck@gmail.com", 27)))
 
       status(result) must equalTo(CREATED)
     }
